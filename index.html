@@ -10,11 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-:root{
-  --bg0:#0c0804;--bg1:#160e07;--bg2:#1e1309;--bg3:#281a0d;
-  --ember:#ff6b3d;--embers:#ffa07a;--lime:#d4ff3a;
-  --cream:#fff4e8;--cdim:#d4bfa6;--cfaint:#7a6855;
-}
+:root{--bg0:#0c0804;--bg1:#160e07;--bg2:#1e1309;--bg3:#281a0d;--ember:#ff6b3d;--embers:#ffa07a;--lime:#d4ff3a;--cream:#fff4e8;--cdim:#d4bfa6;--cfaint:#7a6855;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;background:#080503;overflow:hidden;}
 body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
@@ -122,10 +118,8 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
 .fravi{width:42px;height:42px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .mpill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(212,255,58,.15);color:var(--lime);}
 .ftag{font-size:10px;padding:2px 8px;border-radius:8px;background:var(--bg2);color:var(--cdim);margin:2px 2px 0 0;display:inline-block;}
-/* plan card */
 .plancard{background:var(--bg3);border-radius:12px;padding:12px;margin-bottom:9px;border:1px solid rgba(255,180,80,.1);}
 .plancard.going{border-color:rgba(212,255,58,.2);}
-/* invites */
 .inv-card{background:var(--bg3);border:1px solid rgba(255,107,61,.25);border-radius:14px;padding:13px;margin-bottom:10px;}
 .inv-card.accepted{border-color:rgba(212,255,58,.2);opacity:.65;}
 .inv-card.rejected{opacity:.35;}
@@ -143,6 +137,11 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
 #toast.show{transform:translateX(-50%) translateY(0);}
 .spin{width:28px;height:28px;border:3px solid rgba(255,180,80,.2);border-top-color:var(--ember);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* key input */
+.key-input-field{width:100%;background:var(--bg3);border:1px solid rgba(255,180,80,.15);color:var(--cream);padding:11px 14px;border-radius:12px;font-size:13px;font-family:'Manrope',sans-serif;outline:none;margin-bottom:8px;}
+.key-input-field:focus{border-color:var(--ember);}
+.key-input-field::placeholder{color:var(--cfaint);}
+.key-save-btn{width:100%;padding:11px;border:none;border-radius:12px;background:var(--ember);color:var(--bg0);font-weight:700;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif;}
 </style>
 </head>
 <body>
@@ -163,12 +162,10 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
     <div class="ubadge" onclick="changeUser()"><span id="bid-em"></span>&nbsp;<span id="bid-nm" style="font-weight:500"></span><span style="color:var(--cfaint);font-size:10px;margin-left:4px">↺</span></div>
   </div>
   <div class="tw">
-    <!-- MAP -->
     <div id="tm" class="tab on">
       <div class="mbanner"><span class="ldot"></span>&nbsp;<span id="mstatus" style="flex:1">Obteniendo ubicación...</span><span id="monline" style="font-size:11px;opacity:.6"></span></div>
       <div id="lmap"></div>
     </div>
-    <!-- CHAT -->
     <div id="tc" class="tab">
       <div class="cstream" id="cstream"></div>
       <div class="cinrow" id="fcinrow" style="display:none">
@@ -176,7 +173,6 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
         <button class="sbtn" onclick="sendFree()">→</button>
       </div>
     </div>
-    <!-- EVENTOS -->
     <div id="te" class="tab">
       <div class="mbanner"><span class="ldot"></span>&nbsp;<span id="evbanner" style="flex:1">Cargando eventos...</span><button onclick="fetchEvts(true)" style="background:none;border:none;color:var(--embers);font-size:12px;cursor:pointer;font-family:inherit">↺</button></div>
       <div class="escroll">
@@ -185,10 +181,19 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
         <div id="elist"></div>
       </div>
     </div>
-    <!-- PARA TI -->
     <div id="tp" class="tab">
       <div class="pscrl">
         <h2 class="scrh" style="margin-bottom:14px">Para ti</h2>
+
+        <!-- ── API KEY ── -->
+        <div class="scard">
+          <div class="slbl">🔑 API Key de Gemini</div>
+          <p style="font-size:12px;color:var(--cfaint);margin-bottom:10px">Se guarda solo en este dispositivo. Conseguila en <strong style="color:var(--cdim)">aistudio.google.com</strong></p>
+          <input class="key-input-field" id="key-inp" type="password" placeholder="AIzaSy..."/>
+          <button class="key-save-btn" onclick="saveKey()">Guardar key</button>
+          <div id="key-status" style="font-size:11px;color:var(--lime);margin-top:8px;display:none">✓ Key guardada — recargá la página para activarla</div>
+        </div>
+
         <!-- Invitaciones -->
         <div class="scard" id="inv-section" style="display:none">
           <div class="slbl">🔔 Invitaciones</div>
@@ -223,19 +228,12 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--cream);}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-// ═══════════════════════════════════════════════
-//  EDITÁ ESTAS DOS LÍNEAS:
 const GEMINI_KEY = localStorage.getItem('gk') || "";
 const FB_URL     = "https://junto-demo-default-rtdb.firebaseio.com";
-// ═══════════════════════════════════════════════
 
 firebase.initializeApp({ databaseURL: FB_URL });
 const fbdb = firebase.database();
-
-// ─── FIREBASE HELPER ───────────────────────────
-// Firebase a veces devuelve {0:{...},1:{...}} en vez de array — toArr lo arregla
 const toArr = d => Array.isArray(d) ? d : (d && typeof d==='object') ? Object.values(d) : [];
-
 const DB = {
   async get(k){ try{ const s=await fbdb.ref('junto/'+k).get(); return s.exists()?s.val():null; }catch{ return null; } },
   async set(k,v){ try{ await fbdb.ref('junto/'+k).set(v); }catch(e){ console.warn('FB:',e); } },
@@ -243,7 +241,6 @@ const DB = {
   unlisten(k){ fbdb.ref('junto/'+k).off(); },
 };
 
-// ─── CONSTANTES ────────────────────────────────
 const DAYS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 const HOURS=[{id:'manana',label:'Mañana',icon:'🌅',range:'7–12h'},{id:'tarde',label:'Tarde',icon:'☀️',range:'12–18h'},{id:'noche',label:'Noche',icon:'🌙',range:'18–23h'},{id:'trasnoche',label:'Trasnoche',icon:'🌃',range:'23h+'}];
 const CATS=[{id:'musica',label:'Música',emoji:'🎸',color:'#f97066'},{id:'comida',label:'Comida',emoji:'🍜',color:'#ffb547'},{id:'cafe',label:'Café',emoji:'☕',color:'#c08552'},{id:'deportes',label:'Deportes',emoji:'⚽',color:'#84cc16'},{id:'arte',label:'Arte',emoji:'🎨',color:'#a78bfa'},{id:'cine',label:'Cine',emoji:'🎬',color:'#60a5fa'},{id:'naturaleza',label:'Naturaleza',emoji:'🏞️',color:'#34d399'},{id:'fiesta',label:'Fiesta',emoji:'🪩',color:'#ec4899'},{id:'cultura',label:'Cultura',emoji:'🏛️',color:'#fb923c'}];
@@ -271,12 +268,20 @@ const catOf=id=>CATS.find(c=>c.id===id)||CATS[0];
 const timeAgo=ts=>{const m=Math.floor((Date.now()-ts)/60000);if(m<2)return'ahora';if(m<60)return`hace ${m}m`;const h=Math.floor(m/60);if(h<24)return`hace ${h}h`;return`hace ${Math.floor(h/24)}d`;};
 const S={user:null,lat:null,lng:null,online:{},evts:[...FB_EVENTS],plan:{slot:null,budget:null,frids:[],recs:[]},chatHist:[],freeOn:false};
 
-// ─── GEMINI ────────────────────────────────────
-// Usa gemini-1.5-flash (mejor free tier), con fallback al algoritmo local si hay cuota
+// ── API KEY DESDE LA APP ──
+function saveKey(){
+  const k=document.getElementById('key-inp').value.trim();
+  if(!k){toast('Pegá tu key primero');return;}
+  localStorage.setItem('gk',k);
+  document.getElementById('key-inp').value='';
+  document.getElementById('key-status').style.display='block';
+  toast('Key guardada ✓ — recargá la página');
+}
+
 async function gemini(prompt,{search=false,json=false}={}){
-  if(!GEMINI_KEY)throw new Error('no_key');
-  const model='gemini-1.5-flash'; // mejor free tier que 2.0-flash
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
+  const key=localStorage.getItem('gk')||GEMINI_KEY;
+  if(!key)throw new Error('no_key');
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,
     {method:'POST',headers:{'Content-Type':'application/json'},
      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],...(json?{generationConfig:{responseMimeType:'application/json'}}:{}),...(search?{tools:[{google_search:{}}]}:{})})});
   const d=await r.json();
@@ -284,7 +289,6 @@ async function gemini(prompt,{search=false,json=false}={}){
   return d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('').trim()||'';
 }
 
-// ─── USER ──────────────────────────────────────
 async function selectUser(id){
   S.user={...UD[id]};
   const saved=await DB.get(`uprefs:${id}`);
@@ -294,6 +298,9 @@ async function selectUser(id){
   document.getElementById('app').style.display='flex';
   document.getElementById('bid-em').textContent=S.user.emoji;
   document.getElementById('bid-nm').textContent=S.user.name;
+  // Mostrar key guardada si existe
+  const savedKey=localStorage.getItem('gk');
+  if(savedKey){document.getElementById('key-inp').placeholder='✓ Key guardada';document.getElementById('key-status').style.display='block';}
   boot();
 }
 function changeUser(){
@@ -308,16 +315,13 @@ function changeUser(){
   document.getElementById('app').style.display='none';
 }
 
-// ─── BOOT ──────────────────────────────────────
 function boot(){
   initMap();buildParaTi();buildFilterRow();initChat();
   startGeo();setInterval(syncFriends,5000);
-  // Listener tiempo real para mis invitaciones (Firebase WebSocket)
   DB.listen(`invites:${S.user.id}`, data=>renderInvites(toArr(data)));
   fetchEvts(false);
 }
 
-// ─── MAP ───────────────────────────────────────
 let MAP=null,MEm=null,FRm={},EVm={};
 function initMap(){
   MAP=L.map('lmap',{center:[25.6866,-100.3161],zoom:13,zoomControl:false,attributionControl:false});
@@ -370,51 +374,37 @@ function openPopup(mk,e,cat){
   const fnames=S.plan.frids.map(fid=>(S.online[fid]||UD[fid])?.name||fid).join(', ')||'tus amigos';
   mk.bindPopup(`<div class="pop"><div class="pop-cat">${cat.emoji} ${cat.label}</div><div class="pop-name">${e.name}</div><div class="pop-row">📍 <span>${e.zone||'MTY'}</span></div><div class="pop-row">⏰ <span>${e.time||'—'}</span></div><div class="pop-row">💰 <span style="${(e.price||'').toLowerCase()==='gratis'?'color:var(--lime);font-weight:700':''}">${e.price||'—'}</span></div>${e.desc?`<div class="pop-desc">${e.desc}</div>`:''}<button class="pop-btn" onclick="confirmEvt('${e.id}')">✓ Invitar a ${fnames}</button></div>`,{closeButton:true,maxWidth:240}).openPopup();
 }
-
-// ─── CONFIRM EVENT + SAVE PLAN ─────────────────
 async function confirmEvt(eid){
   const event=S.evts.find(x=>x.id===eid);if(!event)return;
   const frids=S.plan.frids.length?S.plan.frids:Object.keys(UD).filter(id=>id!==S.user.id);
   const planId=`${S.user.id}_${Date.now()}`;
   const cat=catOf(event.cat);
-
-  // Guardar plan organizado
   const rawPlans=await DB.get(`myplans:${S.user.id}`);
   const myPlans=toArr(rawPlans);
   myPlans.push({id:planId,eventId:event.id,eventName:event.name,eventZone:event.zone||'',eventTime:event.time||'',eventCat:event.cat,eventEmoji:cat.emoji,eventColor:cat.color,invited:frids,ts:Date.now()});
   await DB.set(`myplans:${S.user.id}`,myPlans);
-
-  // Enviar invitaciones con el planId incluido
   const names=[];
   for(const fid of frids){await sendInvite(fid,event,planId);names.push((S.online[fid]||UD[fid])?.name||fid);}
   MAP.closePopup();toast(`✓ Invitación enviada a ${names.join(', ')}`);
   setTimeout(()=>{Object.values(EVm).forEach(m=>m.remove());EVm={};S.plan.recs=[];},300);
 }
-
-// ─── INVITATIONS ───────────────────────────────
 async function sendInvite(targetUid,event,planId){
   if(!S.user||targetUid===S.user.id)return;
   const raw=await DB.get(`invites:${targetUid}`);
   const list=toArr(raw);
-  // No duplicar
   if(list.find(i=>i.eventId===event.id&&i.from===S.user.id&&i.status==='pending'))return;
   const cat=catOf(event.cat);
   list.push({id:`${Date.now()}-${Math.random().toString(36).slice(2,7)}`,planId,from:S.user.id,fromName:S.user.name,fromEmoji:S.user.emoji,eventId:event.id,eventName:event.name,eventZone:event.zone||'',eventTime:event.time||'',eventCat:event.cat,eventEmoji:cat.emoji,eventColor:cat.color,ts:Date.now(),status:'pending'});
   await DB.set(`invites:${targetUid}`,list);
 }
-
-// Callback del listener Firebase — se llama automáticamente cuando llega una invitación
 function renderInvites(list){
   if(!list)list=[];
   const pending=list.filter(i=>i.status==='pending');
-  // Badge
   const badge=document.getElementById('inv-badge');
   if(badge)badge.style.display=pending.length?'block':'none';
-  // Sección
   const section=document.getElementById('inv-section');
   const invList=document.getElementById('inv-list');
   if(!section||!invList)return;
-  // Mostrar pendientes + respondidas recientes (últimas 6h)
   const recent=list.filter(i=>i.status!=='pending'&&Date.now()-i.ts<21600000);
   const toShow=[...pending,...recent];
   if(!toShow.length){section.style.display='none';return;}
@@ -434,79 +424,39 @@ function renderInvites(list){
         :`<div style="font-size:12px;font-weight:600;text-align:center;padding:8px;border-radius:10px;margin-top:8px;color:${inv.status==='accepted'?'var(--lime)':'var(--cfaint)'}">${inv.status==='accepted'?'✓ Confirmaste que vas':'✗ Rechazaste esta invitación'}</div>`}
     </div>`).join('');
 }
-
 async function respondInvite(invId,status,planId){
   const key=`invites:${S.user.id}`;
   const raw=await DB.get(key);
   const list=toArr(raw);
   const inv=list.find(i=>i.id===invId);if(!inv)return;
   inv.status=status;
-  await DB.set(key,list); // Firebase listener actualiza la UI automáticamente
-
-  // Si aceptó → registrar en going:planId para que el organizador lo vea
-  if(status==='accepted'&&planId){
-    const goingRaw=await DB.get(`going:${planId}`)||{};
-    goingRaw[S.user.id]={name:S.user.name,emoji:S.user.emoji,ts:Date.now()};
-    await DB.set(`going:${planId}`,goingRaw);
-  }
-  // Si rechazó → remover de going si estaba
-  if(status==='rejected'&&planId){
-    const goingRaw=await DB.get(`going:${planId}`)||{};
-    delete goingRaw[S.user.id];
-    await DB.set(`going:${planId}`,goingRaw);
-  }
+  await DB.set(key,list);
+  if(status==='accepted'&&planId){const g=await DB.get(`going:${planId}`)||{};g[S.user.id]={name:S.user.name,emoji:S.user.emoji,ts:Date.now()};await DB.set(`going:${planId}`,g);}
+  if(status==='rejected'&&planId){const g=await DB.get(`going:${planId}`)||{};delete g[S.user.id];await DB.set(`going:${planId}`,g);}
   toast(status==='accepted'?'¡Confirmado! 🎉 Ya saben que vas':'Rechazaste la invitación');
 }
-
-// ─── PLANES ACTIVOS ────────────────────────────
 async function renderActivePlans(){
   const section=document.getElementById('plans-section');
   const list=document.getElementById('plans-list');
   if(!section||!list)return;
-
   let html='';
-
-  // Planes que organicé
   const rawMine=await DB.get(`myplans:${S.user.id}`);
-  const myPlans=toArr(rawMine);
-  for(const plan of myPlans){
+  for(const plan of toArr(rawMine)){
     const cat=catOf(plan.eventCat);
-    const goingRaw=await DB.get(`going:${plan.id}`)||{};
-    const goers=Object.values(goingRaw).filter(g=>g&&g.name);
-    const invitedNames=toArr(plan.invited).map(fid=>UD[fid]?.name||fid);
-    const pendingNames=invitedNames.filter(n=>!goers.find(g=>g.name===n));
-    html+=`<div class="plancard">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
-        <div style="width:36px;height:36px;border-radius:10px;background:${cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cat.emoji}</div>
-        <div><div style="font-size:13px;font-weight:500">${plan.eventName}</div><div style="font-size:11px;opacity:.6;margin-top:2px">${plan.eventZone} · ${plan.eventTime}</div></div>
-      </div>
-      <div style="font-size:11px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-        <span style="opacity:.6">Tú organizás</span>
-        ${goers.map(g=>`<span style="color:var(--lime);font-weight:600">${g.emoji} ${g.name} ✓</span>`).join('')}
-        ${pendingNames.map(n=>`<span style="opacity:.45">⏳ ${n}</span>`).join('')}
-      </div>
-    </div>`;
+    const goers=Object.values(await DB.get(`going:${plan.id}`)||{}).filter(g=>g&&g.name);
+    const invNames=toArr(plan.invited).map(fid=>UD[fid]?.name||fid);
+    const pending=invNames.filter(n=>!goers.find(g=>g.name===n));
+    html+=`<div class="plancard"><div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><div style="width:36px;height:36px;border-radius:10px;background:${cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cat.emoji}</div><div><div style="font-size:13px;font-weight:500">${plan.eventName}</div><div style="font-size:11px;opacity:.6;margin-top:2px">${plan.eventZone} · ${plan.eventTime}</div></div></div><div style="font-size:11px;display:flex;flex-wrap:wrap;gap:6px"><span style="opacity:.6">Tú organizás</span>${goers.map(g=>`<span style="color:var(--lime);font-weight:600">${g.emoji} ${g.name} ✓</span>`).join('')}${pending.map(n=>`<span style="opacity:.45">⏳ ${n}</span>`).join('')}</div></div>`;
   }
-
-  // Planes a los que voy (acepté invitación)
-  const rawInvites=await DB.get(`invites:${S.user.id}`);
-  const myInvites=toArr(rawInvites).filter(i=>i.status==='accepted');
+  const myInvites=toArr(await DB.get(`invites:${S.user.id}`)).filter(i=>i.status==='accepted');
   for(const inv of myInvites){
     const cat=catOf(inv.eventCat);
-    html+=`<div class="plancard going">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
-        <div style="width:36px;height:36px;border-radius:10px;background:${inv.eventColor||cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${inv.eventEmoji}</div>
-        <div><div style="font-size:13px;font-weight:500">${inv.eventName}</div><div style="font-size:11px;opacity:.6;margin-top:2px">${inv.eventZone} · ${inv.eventTime}</div></div>
-      </div>
-      <div style="font-size:11px;color:var(--lime)">✓ Confirmaste que vas · ${inv.fromEmoji} ${inv.fromName} organizó</div>
-    </div>`;
+    html+=`<div class="plancard going"><div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><div style="width:36px;height:36px;border-radius:10px;background:${inv.eventColor||cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${inv.eventEmoji}</div><div><div style="font-size:13px;font-weight:500">${inv.eventName}</div><div style="font-size:11px;opacity:.6;margin-top:2px">${inv.eventZone} · ${inv.eventTime}</div></div></div><div style="font-size:11px;color:var(--lime)">✓ Confirmaste que vas · ${inv.fromEmoji} ${inv.fromName} organizó</div></div>`;
   }
-
   if(html){section.style.display='block';list.innerHTML=html;}
-  else{section.style.display='none';}
+  else section.style.display='none';
 }
 
-// ─── CHAT ──────────────────────────────────────
 function initChat(){document.getElementById('cstream').innerHTML='';addBot('Hola 👋 ¿Lista para armar un plan?');addOpts([{id:'si',l:'Sí, vamos 🎯'},{id:'no',l:'Después'}],'start');}
 function h_start(id){killOpts('start');if(id==='no'){addUsr('Después');addBot('¡Cuando quieras! 💫');return;}addUsr('Sí, vamos 🎯');addBot('¿Para cuándo? Elige el horario 👇');addOpts(SLOTS.map(s=>({id:s.id,l:s.label,sub:s.range,icon:s.icon})),'slot');}
 function h_slot(id){killOpts('slot');S.plan.slot=SLOTS.find(s=>s.id===id);addUsr(`${S.plan.slot.icon} ${S.plan.slot.label}`);addBot('¿Cuánto quieren gastar? 💸');addGrid(BUDGETS.map(b=>({id:b.id,l:b.label,sub:b.desc,icon:b.icon})),'bud');}
@@ -530,13 +480,16 @@ async function confirmFrs(){
     S.chatHist=[{r:'user',t:`Plan: ${S.plan.slot?.label}, ${S.plan.budget?.label}. Amigos: ${fnames.join(', ')}. Eventos: ${res.recs.map(e=>e.name).join(', ')}.`},{r:'model',t:res.msg}];
   }catch(e){
     rmThink();
-    const isQuota=e.message.includes('quota')||e.message.includes('Quota')||e.message.includes('limit');
-    addBot(isQuota?'Se acabó la cuota de Gemini por ahora 😅 — te armé el plan con el algoritmo local:':e.message==='no_key'?'Agrega tu Gemini key al código 🔑':'Error: '+e.message);
+    const isQ=e.message.includes('quota')||e.message.includes('Quota')||e.message.includes('limit')||e.message.includes('key');
+    if(e.message==='no_key'){addBot('Andá a "Para ti" y pegá tu API key de Gemini 🔑');}
+    else if(isQ){addBot('Se acabó la cuota de Gemini 😅 — igual te armo el plan:');}
+    else{addBot('Error: '+e.message);}
     const fb=simplePick();showRecs(fb);pinEvents(fb);
     document.getElementById('fcinrow').style.display='flex';
   }
 }
 async function buildPlan(){
+  const key=localStorage.getItem('gk')||GEMINI_KEY;if(!key)throw new Error('no_key');
   const frds=S.plan.frids.map(fid=>{const d=S.online[fid]||UD[fid];return`${d?.name}: planes=${(d?.prefs||[]).map(p=>CATS.find(c=>c.id===p)?.label).filter(Boolean).join(', ')}, comida=${(d?.food||[]).map(f=>FOODS.find(x=>x.id===f)?.label).filter(Boolean).join(', ')}`;});
   const me=`${S.user.name}: planes=${(S.user.prefs||[]).map(p=>CATS.find(c=>c.id===p)?.label).filter(Boolean).join(', ')}, comida=${(S.user.food||[]).map(f=>FOODS.find(x=>x.id===f)?.label).filter(Boolean).join(', ')}, presupuesto=${S.plan.budget?.desc}`;
   const eCtx=S.evts.map(e=>`[${e.id}] ${e.name} (${e.cat}, ${e.zone}, ${e.time}, ${e.price})`).join('\n');
@@ -546,7 +499,7 @@ async function buildPlan(){
 }
 function simplePick(){const cc={};(S.user.prefs||[]).forEach(p=>{cc[p]=(cc[p]||0)+2;});return S.evts.slice().sort((a,b)=>(cc[b.cat]||0)-(cc[a.cat]||0)).slice(0,3);}
 function showRecs(recs){const el=mkdiv('bbl bbl-b');el.innerHTML=recs.map(e=>{const cat=catOf(e.cat);return`<div class="rcrd"><div style="width:36px;height:36px;border-radius:10px;background:${cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cat.emoji}</div><div><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;opacity:.6;margin-top:2px">${e.zone} · ${e.time} · ${e.price}</div></div></div>`;}).join('')+`<button class="cta cta-l" onclick="goTab('tm')">Ver en el mapa →</button>`;cs().appendChild(el);sc();}
-async function sendFree(){const inp=document.getElementById('fcin');const msg=inp.value.trim();if(!msg)return;inp.value='';addUsr(msg);addThink();try{const hist=S.chatHist.map(m=>`${m.r==='user'?'Usuario':'Asistente'}: ${m.t}`).join('\n');const rep=await gemini(`Eres Junto (MTY). Español casual, max 2 oraciones.\n${hist}\nUsuario: ${msg}\nAsistente:`);S.chatHist.push({r:'user',t:msg},{r:'model',t:rep});rmThink();addBot(rep);}catch(e){rmThink();const isQ=e.message.includes('quota')||e.message.includes('Quota');addBot(isQ?'Cuota de Gemini agotada, esperá unos segundos 🕐':'Error: '+e.message);}}
+async function sendFree(){const inp=document.getElementById('fcin');const msg=inp.value.trim();if(!msg)return;inp.value='';addUsr(msg);addThink();try{const hist=S.chatHist.map(m=>`${m.r==='user'?'Usuario':'Asistente'}: ${m.t}`).join('\n');const rep=await gemini(`Eres Junto (MTY). Español casual, max 2 oraciones.\n${hist}\nUsuario: ${msg}\nAsistente:`);S.chatHist.push({r:'user',t:msg},{r:'model',t:rep});rmThink();addBot(rep);}catch(e){rmThink();addBot(e.message.includes('quota')?'Cuota agotada, esperá unos segundos 🕐':'Error: '+e.message);}}
 
 const cs=()=>document.getElementById('cstream');
 const sc=()=>setTimeout(()=>{const s=cs();s.scrollTop=s.scrollHeight;},60);
@@ -562,11 +515,11 @@ function killGrid(gid){document.querySelectorAll(`#gg-${gid} .ogbtn`).forEach(b=
 function hdlO(gid,id){if(gid==='start')h_start(id);else if(gid==='slot')h_slot(id);}
 function hdlG(gid,id){if(gid==='bud')h_bud(id);}
 
-// ─── EVENTS TAB ────────────────────────────────
 async function fetchEvts(force){
   if(!force){const c=await DB.get('evts:today');if(c&&c.date===new Date().toDateString()&&c.evts?.length){S.evts=c.evts;renderEvts();document.getElementById('evbanner').textContent='Actualizado hoy a las 7:00am';return;}}
   document.getElementById('elist').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;padding:30px;gap:10px"><div class="spin"></div><div style="font-size:13px;opacity:.6">Buscando eventos reales...</div></div>';
-  if(!GEMINI_KEY){renderEvts();document.getElementById('evbanner').textContent='Sin key — mostrando ejemplos';return;}
+  const key=localStorage.getItem('gk')||GEMINI_KEY;
+  if(!key){renderEvts();document.getElementById('evbanner').textContent='Pon tu key en "Para ti" para eventos reales';return;}
   try{
     const today=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
     const raw=await gemini(`Busca 9 eventos reales en Monterrey México para hoy ${today}. SOLO JSON:\n{"evts":[{"id":"e1","name":"","cat":"musica|comida|cafe|deportes|arte|cine|naturaleza|fiesta|cultura","zone":"","lat":25.6752,"lng":-100.2897,"time":"","price":"","desc":"1 oracion"}]}`,{search:true,json:true});
@@ -584,7 +537,6 @@ function renderEvts(){
 function openEvtDetail(eid){const e=S.evts.find(x=>x.id===eid);if(!e)return;const cat=catOf(e.cat);goTab('tm');setTimeout(()=>{if(!EVm[eid]){const ico=L.divIcon({className:'',html:`<div class="ev-w"><div class="ev-pin" style="background:${cat.color}"><span>${cat.emoji}</span></div><div class="ev-lbl">${e.name.split(' ').slice(0,3).join(' ')}</div></div>`,iconSize:[60,78],iconAnchor:[30,22]});const mk=L.marker([e.lat,e.lng],{icon:ico}).addTo(MAP);EVm[eid]=mk;mk.on('click',()=>openPopup(mk,e,cat));}MAP.setView([e.lat,e.lng],15);openPopup(EVm[eid],e,cat);},200);}
 function buildFilterRow(){const row=document.getElementById('frow');CATS.forEach(c=>{const b=document.createElement('button');b.className='chip';b.innerHTML=`${c.emoji} ${c.label}`;b.onclick=()=>filterE(c.id,b);row.appendChild(b);});}
 
-// ─── PARA TI ───────────────────────────────────
 function calcMatch(myD,myH,fD,fH){const md=myD.filter(d=>fD.includes(d));const mh=myH.filter(h=>fH.includes(h));return{match:md.length>0&&mh.length>0,mdays:md,mhours:mh};}
 function buildParaTi(){
   buildFilterRow();
@@ -615,17 +567,12 @@ function renderFriendList(){
   }).join('');
 }
 
-// ─── TABS ──────────────────────────────────────
 function goTab(id){
   ['tm','tc','te','tp'].forEach(t=>{document.getElementById(t).classList.toggle('on',t===id);document.getElementById(`bn-${t}`).classList.toggle('on',t===id);});
   if(id==='tm'&&MAP)setTimeout(()=>MAP.invalidateSize(),100);
   if(id==='tp'){renderFriendList();renderActivePlans();}
 }
-
-// ─── TOAST ─────────────────────────────────────
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800);}
-
-// ─── INIT ──────────────────────────────────────
 async function init(){const uid=localStorage.getItem('junto_uid');if(uid&&UD[uid])await selectUser(uid);}
 window.addEventListener('load',init);
 </script>
