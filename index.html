@@ -235,8 +235,8 @@ firebase.initializeApp({ databaseURL: FB_URL });
 const fbdb = firebase.database();
 const toArr = d => Array.isArray(d) ? d : (d && typeof d==='object') ? Object.values(d) : [];
 const DB = {
-  async get(k){ try{ const s=await fbdb.ref('junto/'+k).get(); return s.exists()?s.val():null; }catch{ return null; } },
-  async set(k,v){ try{ await fbdb.ref('junto/'+k).set(v); }catch(e){ console.warn('FB:',e); } },
+  async get(k){ try{ const s=await fbdb.ref('junto/'+k).get(); return s.exists()?s.val():null; }catch(e){ console.error('FB get error:',e); return null; } },
+  async set(k,v){ try{ await fbdb.ref('junto/'+k).set(v); }catch(e){ console.error('FB set error:',e); if(typeof toast==='function')toast('⚠️ Firebase: revisá las reglas'); } },
   listen(k,cb){ fbdb.ref('junto/'+k).on('value', s=>cb(s.exists()?s.val():null)); },
   unlisten(k){ fbdb.ref('junto/'+k).off(); },
 };
@@ -294,6 +294,8 @@ async function selectUser(id){
   const saved=await DB.get(`uprefs:${id}`);
   if(saved)Object.assign(S.user,saved);
   localStorage.setItem('junto_uid',id);
+  // Escribir perfil a Firebase INMEDIATAMENTE (no esperar al GPS)
+  await DB.set(`user:${S.user.id}`,{...S.user,lat:25.6866,lng:-100.3161,ts:Date.now()});
   document.getElementById('picker').style.display='none';
   document.getElementById('app').style.display='flex';
   document.getElementById('bid-em').textContent=S.user.emoji;
